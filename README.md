@@ -2,7 +2,7 @@
 
 Bem-vindo(a) ao repositório oficial das aulas de **JavaScript** do blog **Guilherme Machado Dev**! 🚀
 
-![Insira uma imagem aqui](icon-guilhermemachadodev.webp)
+ ![Icon Blog](icon-guilhermemachadodev.webp)
 
 Neste espaço, você encontrará materiais organizados de forma clara e progressiva, do **nível iniciante** ao **mais avançado**. Cada tópico inclui exemplos práticos, desafios estimulantes e projetos para consolidar seu aprendizado, ajudando você a dominar JavaScript e aplicá-lo com confiança em projetos reais.
 
