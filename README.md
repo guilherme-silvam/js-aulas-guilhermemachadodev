@@ -56,8 +56,6 @@ Caso tenha dúvidas, sugestões ou queira compartilhar seu progresso, entre em c
 ---
 
 **Autor:** Guilherme Machado 💻
-=======
-troducao-ao-javascript/)  
 
 ---
 
