@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # Blog Guilherme Machado Dev: Aulas de JavaScript
 
 Bem-vindo(a) ao repositório oficial das aulas de **JavaScript** do blog **Guilherme Machado Dev**! 🚀
