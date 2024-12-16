@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Blog Guilherme Machado Dev: Aulas de JavaScript
 
 Bem-vindo(a) ao repositório oficial das aulas de **JavaScript** do blog **Guilherme Machado Dev**! 🚀
@@ -55,3 +56,19 @@ Caso tenha dúvidas, sugestões ou queira compartilhar seu progresso, entre em c
 ---
 
 **Autor:** Guilherme Machado 💻
+=======
+# Aula 01 - Introdução ao JavaScript  
+
+## Sobre a Aula  1
+A primeira aula foi dedicada à **teoria** e serviu como introdução ao universo do JavaScript. Foi abordada a importância de entender os fundamentos dessa linguagem de programação, que é amplamente utilizada tanto no desenvolvimento web quanto em aplicações modernas.  
+
+Esta aula é **extremamente importante** para construir uma base sólida antes de avançar para conceitos mais práticos e complexos.  
+
+## Acesse o conteúdo  
+Clique no link abaixo para acessar a aula completa:  
+[🔗 Aula 01 - Introdução ao JavaScript](https://guilhermemachadodev.com/aula-1-introducao-ao-javascript/)  
+
+---
+
+⚠️ Certifique-se de revisar este material para ter um bom entendimento da base teórica que será usada nas próximas aulas.  
+>>>>>>> 97b6fb2 (adicionando aula 1)
