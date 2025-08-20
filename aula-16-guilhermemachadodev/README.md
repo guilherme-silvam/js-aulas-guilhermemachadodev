@@ -1,23 +1,17 @@
-# Aula: setTimeout e setInterval (Exemplos + Exercícios)
+# JS Timers (Simples): setTimeout e setInterval
 
-Este repositório contém exemplos didáticos de `setTimeout` e `setInterval` em JavaScript,
-além de exercícios resolvidos. Abra o `index.html` no navegador para testar.
-
-## Como usar
-1. Baixe/clona o repositório.
-2. Abra o arquivo `index.html` no navegador (duplo clique).
-3. Use os botões na página para executar cada exemplo/exercício.
+Exemplos e exercícios resolvidos, com explicações dentro do código.
+Abra o `index.html` no navegador e use os botões para executar cada trecho.
 
 ## Conteúdo
 - Exemplos:
-  - Mensagem com atraso (`setTimeout`)
-  - Cancelando um `setTimeout` (`clearTimeout`)
-  - Intervalo que para sozinho no 5 (`setInterval` + `clearInterval`)
-  - Intervalo anti-drift (mais estável usando `setTimeout` recursivo)
+  1) setTimeout (mensagem após 3s)
+  2) clearTimeout (cancelar antes de rodar)
+  3) setInterval (cronômetro que para no 5)
 
 - Exercícios resolvidos:
-  - Mensagem atrasada (2s)
-  - Contagem regressiva 10 → 0
-  - Texto piscante (mostrar/ocultar a cada 1s)
+  1) Mensagem após 2s
+  2) Contagem regressiva 10 → 0
+  3) Texto piscante (mostra/oculta a cada 1s)
 
-> Observação: este projeto não usa bundlers nem dependências. É apenas HTML + JS puro.
+> Observação: Só HTML + JS puro. 
