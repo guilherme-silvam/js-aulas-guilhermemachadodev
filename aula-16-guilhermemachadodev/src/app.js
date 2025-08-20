@@ -1,173 +1,118 @@
-/* ============================================================================
- * Helpers de UI
- * ==========================================================================*/
-const $out = document.getElementById("output");
-const log = (...args) => {
-  const line = args.join(" ");
-  $out.textContent += ( $out.textContent ? "\n" : "" ) + line;
-  console.log("[LOG]", ...args);
+// ====================== Utilidades simples de tela ======================
+const out = document.getElementById("output");
+const log = (msg) => {
+  out.textContent += (out.textContent ? "\n" : "") + msg;
 };
-const clearOutput = () => ($out.textContent = "");
-document.getElementById("clearOutput").addEventListener("click", clearOutput);
+document.getElementById("clear").onclick = () => (out.textContent = "");
 
-/* ============================================================================
- * Armazenamento central de IDs para permitir "Parar todos os timers"
- * ==========================================================================*/
-const timers = {
-  timeouts: new Set(),
-  intervals: new Set(),
+// Guardar IDs para podermos cancelar depois (com um botão)
+const timeouts = new Set();
+const intervals = new Set();
+document.getElementById("stop").onclick = () => {
+  timeouts.forEach(clearTimeout);
+  intervals.forEach(clearInterval);
+  timeouts.clear();
+  intervals.clear();
+  log("⏹️ Todos os timers foram cancelados.");
 };
-function trackTimeout(id) { timers.timeouts.add(id); return id; }
-function trackInterval(id) { timers.intervals.add(id); return id; }
-function stopAllTimers() {
-  timers.timeouts.forEach(clearTimeout);
-  timers.intervals.forEach(clearInterval);
-  timers.timeouts.clear();
-  timers.intervals.clear();
-  log("⏹️ Todos os timeouts e intervals foram cancelados.");
-}
-document.getElementById("stopAll").addEventListener("click", stopAllTimers);
 
-/* ============================================================================
- * Exemplos da Aula
- * ==========================================================================*/
+// =======================================================================
+// EXEMPLOS (curtos, com explicações nos comentários)
+// =======================================================================
 
-/**
- * Exemplo 1 — Mensagem com atraso (3s)
- * Conceito: setTimeout agenda uma função para rodar uma vez no futuro.
- */
-function exemploTimeout() {
-  log("⌛ Agendando mensagem para 3s…");
-  const id = trackTimeout(setTimeout(() => {
-    log("✅ Oi! Se passaram 3 segundos.");
-  }, 3000));
-  log("ID do timeout:", id);
-}
-document.getElementById("exTimeout").addEventListener("click", exemploTimeout);
+// 1) setTimeout: executa UMA VEZ depois do tempo definido
+document.getElementById("ex1").onclick = () => {
+  log("⌛ Ex1: Agendando mensagem para 3 segundos…");
 
-/**
- * Exemplo 2 — Cancelando um setTimeout
- * Conceito: clearTimeout evita que a função agendada rode.
- */
-function exemploTimeoutCancel() {
-  log("⌛ Agendando mensagem para 2s (mas iremos CANCELAR)...");
-  const id = trackTimeout(setTimeout(() => {
-    log("❌ Isto não deveria aparecer (se cancelado a tempo).");
-  }, 2000));
+  // setTimeout recebe: (função, tempoEmMs)
+  const id = setTimeout(() => {
+    // Esta função roda UMA VEZ após ~3000ms
+    log("✅ Ex1: Oi! Se passaram 3s.");
+  }, 3000);
 
-  // Cancelar antes de 2s
-  trackTimeout(setTimeout(() => {
-    clearTimeout(id);
-    timers.timeouts.delete(id);
-    log("🧹 Timeout cancelado com sucesso!");
-  }, 800));
-}
-document.getElementById("exTimeoutCancel").addEventListener("click", exemploTimeoutCancel);
+  timeouts.add(id); // guardo para poder cancelar depois (se eu quiser)
+};
 
-/**
- * Exemplo 3 — Intervalo que para em 5 execuções
- * Conceito: setInterval repete a função até chamarmos clearInterval.
- */
-function exemploIntervalStop() {
-  let segundos = 0;
-  log("▶️ Iniciando intervalo que para no 5…");
-  const intervalId = trackInterval(setInterval(() => {
-    segundos++;
-    log(`⏱️ Passou ${segundos} segundo(s).`);
+// 2) clearTimeout: cancelar antes de executar
+document.getElementById("ex2").onclick = () => {
+  log("⌛ Ex2: Vou agendar para 2s, mas vou cancelar antes…");
 
-    if (segundos === 5) {
-      clearInterval(intervalId);
-      timers.intervals.delete(intervalId);
-      log("🛑 Cronômetro parado aos 5s.");
+  const id = setTimeout(() => {
+    // Não deve aparecer se cancelar a tempo
+    log("❌ Ex2: (não era pra ver isto)");
+  }, 2000);
+  timeouts.add(id);
+
+  // Cancela em 800ms (antes de 2000ms)
+  const cancelId = setTimeout(() => {
+    clearTimeout(id);        // cancela
+    timeouts.delete(id);     // tira da lista
+    log("🧹 Ex2: Timeout cancelado com sucesso.");
+  }, 800);
+  timeouts.add(cancelId);
+};
+
+// 3) setInterval: executa VÁRIAS VEZES a cada intervalo
+document.getElementById("ex3").onclick = () => {
+  log("▶️ Ex3: Intervalo de 1s que para no 5…");
+  let contador = 0;
+
+  // setInterval recebe: (função, tempoEmMs)
+  const id = setInterval(() => {
+    contador++;                        // atualizo o número
+    log(`⏱️ Ex3: ${contador} segundo(s).`);
+
+    if (contador === 5) {
+      clearInterval(id);               // paro quando chegar em 5
+      intervals.delete(id);
+      log("🛑 Ex3: Parei no 5.");
     }
-  }, 1000));
-}
-document.getElementById("exIntervalStop").addEventListener("click", exemploIntervalStop);
+  }, 1000);
 
-/**
- * Exemplo 4 — Intervalo anti-drift (mais preciso)
- * Conceito: usar setTimeout recursivo e compensar atrasos com Date.now()
- */
-function exemploAntiDrift() {
-  log("🎯 Iniciando 'intervalo' anti-drift (1s) por 5 execuções…");
-  const periodo = 1000; // 1 segundo
-  let proximaExecucao = Date.now() + periodo;
-  let execucoes = 0;
-  const max = 5;
+  intervals.add(id);
+};
 
-  function tick() {
-    execucoes++;
-    const agora = new Date().toLocaleTimeString();
-    log(`Tick #${execucoes} em ${agora}`);
+// =======================================================================
+// EXERCÍCIOS RESOLVIDOS (curtos)
+// =======================================================================
 
-    if (execucoes >= max) {
-      log("✅ Finalizado anti-drift.");
-      return;
-    }
+// 1) Mensagem após 2s
+document.getElementById("ex4").onclick = () => {
+  log("📚 Ex4: Mensagem em 2s…");
+  const id = setTimeout(() => {
+    log("🎓 Ex4: Hora de estudar JavaScript!");
+  }, 2000);
+  timeouts.add(id);
+};
 
-    proximaExecucao += periodo;
-    const atraso = proximaExecucao - Date.now();
-
-    // Agendar próxima rodada compensando atrasos
-    trackTimeout(setTimeout(tick, Math.max(0, atraso)));
-  }
-
-  // Disparo inicial
-  trackTimeout(setTimeout(tick, periodo));
-}
-document.getElementById("exAntiDrift").addEventListener("click", exemploAntiDrift);
-
-/* ============================================================================
- * Exercícios Resolvidos
- * ==========================================================================*/
-
-/**
- * Exercício 1 — Mensagem atrasada (2s)
- * Requisito: exibir "Hora de estudar JavaScript!" após 2 segundos.
- */
-function exMensagem2s() {
-  log("📚 Exercício 1: agendando mensagem para 2s…");
-  trackTimeout(setTimeout(() => {
-    log("🎓 Hora de estudar JavaScript!");
-  }, 2000));
-}
-document.getElementById("exMsg2s").addEventListener("click", exMensagem2s);
-
-/**
- * Exercício 2 — Contagem regressiva (10 → 0)
- * Requisito: contar de 10 até 0, exibir "Fim!" e parar.
- */
-function exContagemRegressiva() {
+// 2) Contagem regressiva 10 → 0
+document.getElementById("ex5").onclick = () => {
+  log("🔻 Ex5: Contagem 10 → 0");
   let n = 10;
-  log("🔻 Exercício 2: iniciando contagem regressiva 10 → 0…");
-  const id = trackInterval(setInterval(() => {
-    log(`Contagem: ${n}`);
+
+  const id = setInterval(() => {
+    log(`Ex5: ${n}`);
     n--;
     if (n < 0) {
       clearInterval(id);
-      timers.intervals.delete(id);
-      log("🏁 Fim!");
+      intervals.delete(id);
+      log("🏁 Ex5: Fim!");
     }
-  }, 1000));
-}
-document.getElementById("exCountdown").addEventListener("click", exContagemRegressiva);
+  }, 1000);
 
-/**
- * Exercício 3 — Texto piscante (1s)
- * Requisito: alternar mostrar/ocultar a cada 1s.
- * Implementação: alternamos entre adicionar/remover um marcador no output.
- */
-function exTextoPiscante() {
-  log("✨ Exercício 3: iniciando texto piscante (1s). Use 'Parar todos' para interromper.");
+  intervals.add(id);
+};
+
+// 3) Texto piscante (mostra/oculta a cada 1s)
+document.getElementById("ex6").onclick = () => {
+  log("✨ Ex6: piscando (use 'Parar todos' para interromper)");
   let visivel = true;
-  const id = trackInterval(setInterval(() => {
-    visivel = !visivel;
-    const marker = visivel ? "🔆 [VISÍVEL]" : "🌑[OCULTO]";
-    log(`Piscando… ${marker}`);
-  }, 1000));
-}
-document.getElementById("exBlink").addEventListener("click", exTextoPiscante);
 
-/* ============================================================================
- * Qualquer dúvida, veja os comentários em cada função acima.
- * ==========================================================================*/
+  const id = setInterval(() => {
+    visivel = !visivel; // alterna entre true/false
+    const estado = visivel ? "[VISÍVEL]" : "[OCULTO]";
+    log(`Ex6: ${estado}`);
+  }, 1000);
+
+  intervals.add(id);
+};
