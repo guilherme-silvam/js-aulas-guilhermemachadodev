@@ -2,61 +2,50 @@
 <html lang="pt-br">
 <head>
   <meta charset="utf-8" />
-  <title>Aula: setTimeout e setInterval | Exemplos e Exercícios</title>
+  <title>Aula: setTimeout e setInterval (Simples)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    body { margin: 24px; line-height: 1.5; }
-    h1, h2 { margin: 0 0 8px; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; }
+    h1 { margin-bottom: 6px; }
+    small { color: #64748b; }
     section { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin: 16px 0; }
     .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-    button {
-      border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px 14px; cursor: pointer;
-      background: #f8fafc;
-    }
+    button { padding: 10px 14px; border-radius: 10px; border: 1px solid #e5e7eb; background: #f8fafc; cursor: pointer; }
     button:hover { background: #eef2ff; }
-    #output { white-space: pre-wrap; border: 1px dashed #cbd5e1; padding: 12px; border-radius: 10px; min-height: 120px; }
-    .muted { color: #64748b; font-size: 0.9rem; }
-    .ok { color: #059669; }
-    .warn { color: #b45309; }
+    #output { white-space: pre-wrap; border: 1px dashed #cbd5e1; padding: 12px; border-radius: 10px; min-height: 110px; }
   </style>
 </head>
 <body>
-  <h1>Aula: <code>setTimeout</code> e <code>setInterval</code></h1>
-  <p class="muted">Clique nos botões para executar cada exemplo/exercício. Veja o resultado no painel de saída.</p>
+  <h1>Timers em JS</h1>
+  <small>Somente <code>setTimeout</code> e <code>setInterval</code> com exemplos curtos.</small>
 
   <section>
     <h2>Saída</h2>
-    <div id="output">A saída dos exemplos aparecerá aqui…</div>
+    <div id="output">A saída aparece aqui…</div>
     <div class="row">
-      <button id="clearOutput">Limpar saída</button>
+      <button id="clear">Limpar saída</button>
     </div>
   </section>
 
   <section>
-    <h2>Exemplos da Aula</h2>
+    <h2>Exemplos</h2>
     <div class="row">
-      <button id="exTimeout">Ex: Mensagem com atraso (3s)</button>
-      <button id="exTimeoutCancel">Ex: Cancelar um setTimeout</button>
-      <button id="exIntervalStop">Ex: Intervalo que para em 5s</button>
-      <button id="exAntiDrift">Ex: Intervalo anti-drift</button>
+      <button id="ex1">1) setTimeout (3s)</button>
+      <button id="ex2">2) clearTimeout (cancelar)</button>
+      <button id="ex3">3) setInterval (para no 5)</button>
     </div>
   </section>
 
   <section>
-    <h2>Exercícios Resolvidos</h2>
+    <h2>Exercícios resolvidos</h2>
     <div class="row">
-      <button id="exMsg2s">Exercício 1: Mensagem atrasada (2s)</button>
-      <button id="exCountdown">Exercício 2: Contagem regressiva (10 → 0)</button>
-      <button id="exBlink">Exercício 3: Texto piscante (1s)</button>
-      <button id="stopAll">Parar todos os timers</button>
+      <button id="ex4">1) Mensagem após 2s</button>
+      <button id="ex5">2) Contagem regressiva 10 → 0</button>
+      <button id="ex6">3) Texto piscante</button>
+      <button id="stop">Parar todos os timers</button>
     </div>
   </section>
 
-  <p class="muted">
-    Dica: Abra também o console do navegador (F12) para ver logs complementares.
-  </p>
-
-  <script src="./src/app.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
