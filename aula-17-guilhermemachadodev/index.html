@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aula JS — Síncrono, Assíncrono, Promises, Async/Await e Erros</title>
+  <style>
+    :root { --bg:#0f172a; --panel:#111827; --ink:#e5e7eb; --muted:#9ca3af; --accent:#22c55e; --danger:#ef4444; }
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
+    .wrap{max-width:980px;margin:40px auto;padding:0 16px;}
+    h1,h2,h3{line-height:1.2}
+    h1{font-size:28px;margin:0 0 12px}
+    h2{font-size:22px;margin:28px 0 8px}
+    h3{font-size:18px;margin:18px 0 8px;color:var(--muted)}
+    section{background:var(--panel);border-radius:14px;padding:16px 16px 12px;margin:18px 0;box-shadow:0 6px 30px rgba(0,0,0,.25)}
+    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    button{appearance:none;border:0;background:var(--accent);color:#06270f;font-weight:700;padding:10px 14px;border-radius:10px;cursor:pointer}
+    button.secondary{background:#334155;color:#e2e8f0}
+    button.danger{background:var(--danger);color:#fff}
+    input,textarea{background:#0b1220;color:var(--ink);border:1px solid #22314a;border-radius:10px;padding:10px}
+    input{height:40px}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
+    @media (min-width:760px){.grid{grid-template-columns:1fr 1fr}}
+    .console{background:#0b1220;border:1px solid #22314a;border-radius:12px;padding:12px;min-height:120px;white-space:pre-wrap}
+    small{color:var(--muted)}
+    .badge{display:inline-block;background:#1f2937;color:#e5e7eb;border:1px solid #374151;padding:.15rem .45rem;border-radius:999px;font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Aula JS — Síncrono x Assíncrono, Callbacks, Promises, Async/Await e Tratamento de Erros</h1>
+    <p><small>Abra o console embutido abaixo (não precisa do DevTools). Cada exemplo tem <em>botões</em> para executar e comentários no código.</small></p>
+
+    <!-- 1) SÍNCRONO x ASSÍNCRONO -->
+    <section id="sync-async">
+      <h2>1) Fundamentos — Síncrono x Assíncrono</h2>
+      <div class="row">
+        <button id="btn-sync">Rodar exemplo síncrono</button>
+        <button id="btn-async">Rodar exemplo assíncrono (setTimeout)</button>
+      </div>
+      <pre id="log-sync" class="console" aria-live="polite"></pre>
+      <script>
+        // Utilitário simples para logar em uma "console" na página
+        function uiLog(targetId, ...msgs){
+          const box = document.getElementById(targetId);
+          const text = msgs.map(m => typeof m === 'string' ? m : JSON.stringify(m)).join(' ');
+          box.textContent += text + '\n';
+        }
+        function uiClear(targetId){ const box = document.getElementById(targetId); box.textContent=''; }
+
+        // Exemplo síncrono: imprime em ordem
+        document.getElementById('btn-sync').addEventListener('click', () => {
+          uiClear('log-sync');
+          uiLog('log-sync','[Síncrono] A');
+          uiLog('log-sync','[Síncrono] B');
+          uiLog('log-sync','[Síncrono] C');
+        });
+
+        // Exemplo assíncrono: o setTimeout agenda execução
+        document.getElementById('btn-async').addEventListener('click', () => {
+          uiClear('log-sync');
+          uiLog('log-sync','A');
+          setTimeout(() => uiLog('log-sync','B (após 1s)'), 1000);
+          uiLog('log-sync','C');
+        });
+      </script>
+    </section>
+
+    <!-- 2) CALLBACKS -->
+    <section id="callbacks">
+      <h2>2) Callbacks — função como argumento</h2>
+      <div class="row">
+        <button id="btn-callback">Clique (callback em evento)</button>
+      </div>
+      <pre id="log-callback" class="console"></pre>
+      <script>
+        // Callback em evento de clique
+        document.getElementById('btn-callback').addEventListener('click', () => {
+          uiLog('log-callback', 'Botão clicado! (callback executado)');
+        });
+      </script>
+    </section>
+
+    <!-- 3) PROMISES -->
+    <section id="promises">
+      <h2>3) Promises — estados e consumo</h2>
+      <div class="row">
+        <button id="btn-promise">Executar Promise (esperar 600ms)</button>
+      </div>
+      <pre id="log-promise" class="console"></pre>
+      <script>
+        // Função utilitária que devolve uma Promise resolvida após ms
+        function esperar(ms){
+          return new Promise((resolve) => {
+            setTimeout(() => resolve(`Esperei ${ms}ms`), ms);
+          });
+        }
+        document.getElementById('btn-promise').addEventListener('click', () => {
+          uiClear('log-promise');
+          const p = esperar(600);
+          uiLog('log-promise','Estado inicial: pending (aguardando)...');
+          p.then(msg => {
+            uiLog('log-promise','Fulfilled →', msg);
+          }).catch(err => {
+            uiLog('log-promise','Rejected →', err.message);
+          }).finally(() => {
+            uiLog('log-promise','finally() executou (sucesso ou erro).');
+          });
+        });
+      </script>
+    </section>
+
+    <!-- 4) ASYNC / AWAIT -->
+    <section id="async-await">
+      <h2>4) Async/Await — açúcar sintático sobre Promises</h2>
+      <div class="row">
+        <button id="btn-steps">Executar etapas com await</button>
+        <button id="btn-steps-erro" class="danger">Executar com erro</button>
+      </div>
+      <pre id="log-async" class="console"></pre>
+      <script>
+        async function etapas(){
+          uiClear('log-async');
+          uiLog('log-async', 'Início');
+          await esperar(400); uiLog('log-async','Passo 1 concluído');
+          await esperar(400); uiLog('log-async','Passo 2 concluído');
+          uiLog('log-async','Fim do processo');
+        }
+        async function etapasComErro(){
+          uiClear('log-async');
+          try {
+            uiLog('log-async','Iniciando...');
+            await esperar(300);
+            throw new Error('Falha simulada durante as etapas');
+          } catch (err) {
+            uiLog('log-async','catch →', err.message);
+          } finally {
+            uiLog('log-async','finally → limpeza/encerramento');
+          }
+        }
+        document.getElementById('btn-steps').addEventListener('click', etapas);
+        document.getElementById('btn-steps-erro').addEventListener('click', etapasComErro);
+      </script>
+    </section>
+
+    <!-- 5) TRATAMENTO DE ERROS (FORM + FINALLY/SPINNER) -->
+    <section id="erros-front">
+      <h2>5) Tratamento de erros no Front-End</h2>
+      <div class="grid">
+        <div>
+          <h3>5.1 Formulário com validação (try/catch)</h3>
+          <form id="cadastro" autocomplete="off">
+            <div class="row">
+              <input id="nome" placeholder="Nome" />
+              <button>Enviar</button>
+            </div>
+            <p id="erro" class="badge" style="display:none;background:#3f1d1d;border-color:#b91c1c;color:#fecaca"></p>
+          </form>
+          <pre id="log-form" class="console"></pre>
+        </div>
+        <div>
+          <h3>5.2 Spinner com finally (limpeza garantida)</h3>
+          <div class="row">
+            <button id="salvar">Salvar</button>
+            <span id="spinner" class="badge" style="display:none">Carregando…</span>
+          </div>
+          <pre id="log-save" class="console"></pre>
+        </div>
+      </div>
+      <script>
+        // 5.1 Validação com try/catch
+        const form = document.getElementById('cadastro');
+        const erroEl = document.getElementById('erro');
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          erroEl.style.display = 'none';
+          document.getElementById('log-form').textContent = '';
+          try {
+            const nome = document.getElementById('nome')?.value?.trim();
+            if (!nome) throw new Error('O nome é obrigatório.');
+            uiLog('log-form', `Cadastro realizado: ${nome}`);
+            form.reset();
+          } catch (err) {
+            erroEl.textContent = err.message;
+            erroEl.style.display = 'inline-block';
+          }
+        });
+
+        // 5.2 Spinner com finally
+        const btn = document.querySelector('#salvar');
+        const spinner = document.querySelector('#spinner');
+        async function salvarNoFront(){
+          btn.disabled = true;
+          spinner.style.display = 'inline-block';
+          try {
+            await esperar(1200); // simula trabalho
+            uiLog('log-save', 'Salvo localmente!');
+          } catch (err) {
+            uiLog('log-save', 'Erro ao salvar:', err.message);
+          } finally {
+            btn.disabled = false;
+            spinner.style.display = 'none';
+          }
+        }
+        btn.addEventListener('click', salvarNoFront);
+      </script>
+    </section>
+
+    <!-- 6) CARREGAR IMAGEM COM TRATAMENTO -->
+    <section id="imagem">
+      <h2>6) Carregamento de imagem com tratamento</h2>
+      <div class="row">
+        <button id="btn-img-ok" class="secondary">Carregar imagem válida</button>
+        <button id="btn-img-erro" class="danger">Carregar imagem com erro</button>
+      </div>
+      <div id="banner" style="margin-top:10px;min-height:120px;border:1px dashed #22314a;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:8px">(banner)</div>
+      <pre id="log-img" class="console"></pre>
+      <script>
+        function carregarImagem(src){
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload  = () => resolve(img);
+            img.onerror = () => reject(new Error('Falha ao carregar imagem'));
+            img.src = src;
+          });
+        }
+        async function mostrarBannerValido(){
+          const container = document.querySelector('#banner');
+          try {
+            // pequeno PNG 1x1 transparente em data URL
+            const dataPng = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAucB9U5o4T0AAAAASUVORK5CYII=';
+            const img = await carregarImagem(dataPng);
+            img.style.maxHeight = '100px';
+            container.replaceChildren(img);
+            uiLog('log-img','Imagem carregada com sucesso.');
+          } catch (err) {
+            container.textContent = 'Não foi possível carregar o banner.';
+            uiLog('log-img','Erro:', err.message);
+          }
+        }
+        async function mostrarBannerComErro(){
+          const container = document.querySelector('#banner');
+          try {
+            const img = await carregarImagem('arquivo_inexistente.png');
+            container.replaceChildren(img);
+          } catch (err) {
+            container.textContent = 'Não foi possível carregar o banner.';
+            uiLog('log-img','Erro:', err.message);
+          }
+        }
+        document.getElementById('btn-img-ok').addEventListener('click', mostrarBannerValido);
+        document.getElementById('btn-img-erro').addEventListener('click', mostrarBannerComErro);
+      </script>
+    </section>
+
+    <!-- 7) PARÂMETROS OPCIONAIS E DEFAULTS -->
+    <section id="defaults">
+      <h2>7) Parâmetros opcionais e valores padrão</h2>
+      <div class="row">
+        <button id="btn-ferver-0">ferverAgua()</button>
+        <button id="btn-ferver-1">ferverAgua(true)</button>
+        <button id="btn-ferver-2">ferverAgua(true, true)</button>
+      </div>
+      <pre id="log-defaults" class="console"></pre>
+      <script>
+        function ferverAgua(chaleiraEstaNoFogao = false, fogaoEstaLigado = false){
+          if (chaleiraEstaNoFogao && fogaoEstaLigado){
+            return 'Fervendo água…';
+          } else {
+            return 'Coloque a chaleira no fogão e ligue o fogão.';
+          }
+        }
+        document.getElementById('btn-ferver-0').addEventListener('click', () => {
+          uiClear('log-defaults'); uiLog('log-defaults', ferverAgua());
+        });
+        document.getElementById('btn-ferver-1').addEventListener('click', () => {
+          uiClear('log-defaults'); uiLog('log-defaults', ferverAgua(true));
+        });
+        document.getElementById('btn-ferver-2').addEventListener('click', () => {
+          uiClear('log-defaults'); uiLog('log-defaults', ferverAgua(true,true));
+        });
+      </script>
+    </section>
+
+    <section>
+      <h3>Observações finais</h3>
+      <ul>
+        <li><span class="badge">Dica</span> Prefira <code>async/await</code> para legibilidade e use <code>try/catch/finally</code> para controlar a UI.</li>
+        <li><span class="badge">Validação</span> Sempre limpe entradas com <code>.trim()</code> e dê mensagens claras ao usuário.</li>
+        <li><span class="badge">Sem travar UI</span> Operações demoradas devem ser assíncronas; indique progresso (spinner).</li>
+      </ul>
+    </section>
+  </div>
+</body>
+</html>
