@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <!--
+    ▶ AULA PRÁTICA — JSON e Fetch em JavaScript (arquivo único)
+    -----------------------------------------------------------
+    Este arquivo HTML contém:
+      1) Demonstrações de JSON: o que é, estrutura, parse e stringify
+      2) Comparação JSON x XML (texto curto no HTML)
+      3) Exemplo completo de Fetch consumindo a API pública do baralho
+
+    Como usar:
+      - Salve como: aula-json-fetch.html
+      - Abra no navegador (sem servidor) — o exemplo do baralho funciona online
+        porque consome uma API pública (deckofcardsapi.com).
+
+    Objetivos didáticos:
+      - Mostrar o ciclo completo: JSON ⇄ Objeto JS
+      - Explicar response/ok/status e tratamento de erro
+      - Aplicar Fetch com async/await e com then/catch
+  -->
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JSON e Fetch em JavaScript — Aula prática</title>
+  <!-- Meta SEO básicas -->
+  <meta name="description" content="Aula prática de JavaScript: o que é JSON, JSON vs XML, parse e stringify, e como usar Fetch com um exemplo real usando a API do baralho." />
+  <meta name="keywords" content="JSON, JavaScript, Fetch API, parse, stringify, API, tutorial, iniciante" />
+
+  <style>
+    /* Estilos simples focados na leitura e no código */
+    :root { --bg:#0b1020; --card:#0f1530; --text:#e6e9f5; --muted:#aab0cf; --accent:#6ad1ff; --ok:#1ddb7f; --err:#ff6a6a; }
+    html,body{height:100%}
+    body { margin: 0; font: 16px/1.55 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: radial-gradient(1200px 600px at 20% -10%, #12204a 0, #0b1020 40%, #070b17 100%); }
+    header{padding:40px 24px 8px}
+    h1{margin:0 0 6px;font-size:28px}
+    p.lead{margin:0;color:var(--muted)}
+    main{padding:24px; display:grid; gap:20px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.08); border-radius:16px; box-shadow: 0 10px 30px rgba(0,0,0,.25); overflow:hidden}
+    .card h2{font-size:18px; margin:0; padding:16px 16px 8px}
+    .card .body{padding:0 16px 16px}
+    .muted{color:var(--muted)}
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    pre { background: #0a0f22; border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:12px; overflow:auto }
+    button{background:#182347; color:#fff; border:1px solid rgba(255,255,255,.18); border-radius:10px; padding:10px 14px; cursor:pointer; font-weight:600}
+    button:hover{filter:brightness(1.08)}
+    .ok{color:var(--ok)}
+    .err{color:var(--err)}
+    .grid{display:grid; gap:12px}
+    .two{grid-template-columns: 1fr 1fr}
+    .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+    .kv{display:grid; grid-template-columns: 140px 1fr; gap:6px; font-size:14px}
+    .img-card{width:110px; border-radius:10px; box-shadow:0 8px 22px rgba(0,0,0,.35)}
+    .status{font-size:14px; margin-top:8px}
+    .bar{height:1px; background:linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent); margin:12px 0}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>JSON e Fetch em JavaScript — Aula prática</h1>
+    <p class="lead">Entenda JSON (estrutura, parse/stringify, comparação com XML) e aprenda Fetch na prática com a API do baralho.</p>
+  </header>
+
+  <main>
+    <!-- ---------------------------------------------------- -->
+    <!-- 1) O QUE É JSON + ESTRUTURA                           -->
+    <!-- ---------------------------------------------------- -->
+    <section class="card" id="sec-json">
+      <h2>1) JSON — o que é e como se parece</h2>
+      <div class="body">
+        <p>
+          <strong>JSON (JavaScript Object Notation)</strong> é um formato de dados baseado em texto, composto por pares <em>chave:valor</em>.
+          Ele é legível por humanos e simples para máquinas. A seguir, um exemplo válido de JSON:
+        </p>
+        <pre><code>{
+  "nome": "Maria",
+  "idade": 25,
+  "ativo": true,
+  "hobbies": ["leitura", "programação", "música"],
+  "endereco": { "cidade": "São Paulo", "uf": "SP" }
+}</code></pre>
+        <p class="muted">Regras principais: chaves e strings com aspas duplas; aceita valores string, número, boolean, null, array e objeto; não aceita comentários.</p>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------- -->
+    <!-- 2) JSON x XML (curto)                                 -->
+    <!-- ---------------------------------------------------- -->
+    <section class="card" id="sec-xml">
+      <h2>2) JSON x XML (visão rápida)</h2>
+      <div class="body">
+        <div class="kv">
+          <div>Legibilidade</div><div>JSON é mais direto; XML é mais verboso</div>
+          <div>Tamanho</div><div>JSON tende a ser menor</div>
+          <div>Estrutura</div><div>Chave-valor (objetos/arrays) vs. tags aninhadas</div>
+          <div>Uso atual</div><div>APIs modernas preferem JSON; XML é comum em legados</div>
+        </div>
+        <div class="bar"></div>
+        <p class="muted">Na prática web moderna, JSON é o padrão de troca de dados.</p>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------- -->
+    <!-- 3) JSON ⇄ OBJETO (parse e stringify)                  -->
+    <!-- ---------------------------------------------------- -->
+    <section class="card" id="sec-parse">
+      <h2>3) Converter JSON para Objeto e Objeto para JSON</h2>
+      <div class="body">
+        <div class="grid two">
+          <div>
+            <h3>JSON → Objeto (JSON.parse)</h3>
+            <pre><code>// Uma string no formato JSON válido
+const jsonString = '{"nome":"Carlos","idade":30,"ativo":true}';
+
+// Converte a string JSON para um objeto JavaScript
+const obj = JSON.parse(jsonString);
+
+console.log(obj.nome); // "Carlos"
+console.log(obj.idade); // 30
+console.log(obj.ativo); // true</code></pre>
+          </div>
+          <div>
+            <h3>Objeto → JSON (JSON.stringify)</h3>
+            <pre><code>// Um objeto JavaScript comum
+const usuario = { nome: "Ana", idade: 22, tags: ["js","web"] };
+
+// Converte o objeto para uma string JSON
+const comoJSON = JSON.stringify(usuario);
+
+console.log(comoJSON); // '{"nome":"Ana","idade":22,"tags":["js","web"]}'</code></pre>
+          </div>
+        </div>
+        <p class="muted">Dica: <code>JSON.stringify</code> aceita parâmetros extras para espaçamento e replacer, úteis para "embelezar" o JSON: <code>JSON.stringify(obj, null, 2)</code>.</p>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------- -->
+    <!-- 4) FETCH — ESTRUTURA BÁSICA                           -->
+    <!-- ---------------------------------------------------- -->
+    <section class="card" id="sec-fetch-basico">
+      <h2>4) Fetch — Estrutura básica</h2>
+      <div class="body">
+        <pre><code>// Requisição GET simples
+fetch("https://api.exemplo.com/dados")
+  .then(response => response.json())     // 1) Converte o corpo para JSON
+  .then(data => {
+    console.log(data);                   // 2) Usa os dados convertidos
+  })
+  .catch(err => {
+    console.error("Erro:", err);         // 3) Trata erros de rede/parsing
+  });</code></pre>
+        <p>
+          O primeiro <code>then</code> recebe um <strong>objeto Response</strong> (envoltório da resposta HTTP). 
+          Para acessar os dados, usamos métodos como <code>response.json()</code>, <code>response.text()</code> ou <code>response.blob()</code>.
+        </p>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------- -->
+    <!-- 5) FETCH + BARALHO — EXEMPLO COMPLETO (async/await)    -->
+    <!-- ---------------------------------------------------- -->
+    <section class="card" id="sec-baralho">
+      <h2>5) Exemplo prático com Fetch: sorteando uma carta</h2>
+      <div class="body">
+        <p>
+          Abaixo, usamos a API pública do baralho para: criar e embaralhar um baralho, puxar 1 carta e exibir na tela.
+          Clique no botão para executar. O código está <em>comentado</em> dentro do &lt;script&gt;.
+        </p>
+        <div class="row">
+          <button id="btn-sorteio">Sortear carta</button>
+          <span id="status" class="status muted"></span>
+        </div>
+        <div id="resultado" class="row" style="margin-top:14px" hidden>
+          <img id="img-carta" class="img-card" alt="Carta sorteada" />
+          <div>
+            <div><strong id="titulo-carta"></strong></div>
+            <div class="muted" id="meta-carta"></div>
+          </div>
+        </div>
+
+        <pre><code>&lt;script&gt;
+// =============================
+// Exemplo completo com async/await
+// =============================
+
+// 1) URL base da API do baralho (evita repetir strings)
+const BASE_URL = "https://deckofcardsapi.com/api/deck";
+
+// 2) Referências de elementos de interface
+const btn = document.getElementById("btn-sorteio");
+const statusEl = document.getElementById("status");
+const box = document.getElementById("resultado");
+const img = document.getElementById("img-carta");
+const title = document.getElementById("titulo-carta");
+const meta = document.getElementById("meta-carta");
+
+// 3) Função utilitária para mostrar mensagens ao usuário
+function setStatus(msg, ok = true){
+  statusEl.textContent = msg;
+  statusEl.style.color = ok ? "" : "#ff6a6a"; // vermelho em caso de erro
+}
+
+// 4) Garante que a resposta HTTP tenha status 2xx
+async function ensureOk(response){
+  // Se a resposta NÃO está ok (status fora de 200–299), lança erro com detalhes
+  if(!response.ok){
+    let extra = "";
+    try{ extra = await response.text(); }catch(e){}
+    throw new Error(`HTTP ${response.status} - ${response.statusText}${extra?": "+extra:""}`);
+  }
+  return response; // caso contrário, deixa seguir o fluxo
+}
+
+// 5) Fluxo principal: criar baralho → puxar 1 carta → atualizar UI
+async function sortearCarta(){
+  try{
+    setStatus("Criando e embaralhando baralho...");
+    box.hidden = true; // esconde o resultado anterior
+
+    // 5.1) Cria um baralho novo já embaralhado
+    //      GET /new/shuffle/?deck_count=1
+    const criarResp = await ensureOk(
+      await fetch(`${BASE_URL}/new/shuffle/?deck_count=1`)
+    );
+    const criarData = await criarResp.json(); // { success, deck_id, remaining, shuffled }
+
+    // 5.2) Sorteia 1 carta do baralho criado
+    //      GET /{deck_id}/draw/?count=1
+    setStatus("Sorteando 1 carta...");
+    const drawResp = await ensureOk(
+      await fetch(`${BASE_URL}/${criarData.deck_id}/draw/?count=1`)
+    );
+    const drawData = await drawResp.json(); // { cards: [...], remaining, ... }
+
+    // 5.3) Extrai a primeira carta retornada (há apenas 1)
+    const [carta] = drawData.cards; // value, suit, code, image
+
+    // 5.4) Atualiza a interface com a carta sorteada
+    img.src = carta.image; // URL da imagem
+    img.alt = `Carta ${carta.value} de ${carta.suit}`; // acessibilidade
+    title.textContent = `${carta.value} de ${carta.suit}`;
+    meta.textContent = `Código: ${carta.code} • Restantes no baralho: ${drawData.remaining}`;
+
+    // 5.5) Mostra o resultado e finaliza status
+    box.hidden = false;
+    setStatus("Pronto! Carta sorteada com sucesso.");
+  }catch(err){
+    // 5.6) Tratamento de erros de rede/HTTP/parsing
+    console.error(err);
+    setStatus(`Falha ao sortear carta: ${err.message}`, false);
+    box.hidden = true;
+  }
+}
+
+// 6) Liga o clique do botão ao fluxo principal
+btn.addEventListener("click", sortearCarta);
+&lt;/script&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------- -->
+    <!-- 6) FETCH — ALTERNATIVA COM THEN/CATCH                  -->
+    <!-- ---------------------------------------------------- -->
+    <section class="card" id="sec-then">
+      <h2>6) Alternativa do mesmo fluxo usando then/catch</h2>
+      <div class="body">
+        <p>Mesmo exemplo, mas usando encadeamento de promises:</p>
+        <pre><code>function sortearCartaThenCatch(){
+  setStatus("Criando e embaralhando baralho...");
+  box.hidden = true;
+
+  fetch(`${BASE_URL}/new/shuffle/?deck_count=1`)
+    .then(ensureOk)
+    .then(r => r.json())
+    .then(data => {
+      setStatus("Sorteando 1 carta...");
+      return fetch(`${BASE_URL}/${data.deck_id}/draw/?count=1`);
+    })
+    .then(ensureOk)
+    .then(r => r.json())
+    .then(draw => {
+      const [carta] = draw.cards;
+      img.src = carta.image;
+      img.alt = `Carta ${carta.value} de ${carta.suit}`;
+      title.textContent = `${carta.value} de ${carta.suit}`;
+      meta.textContent = `Código: ${carta.code} • Restantes: ${draw.remaining}`;
+      box.hidden = false;
+      setStatus("Pronto! Carta sorteada com sucesso.");
+    })
+    .catch(err => {
+      console.error(err);
+      setStatus(`Falha ao sortear carta: ${err.message}`, false);
+      box.hidden = true;
+    });
+}</code></pre>
+        <p class="muted">Escolha o estilo que preferir — <strong>async/await</strong> costuma ser mais legível, mas <strong>then/catch</strong> é igualmente válido.</p>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------- -->
+    <!-- 7) DICAS FINAIS / EXTENSÕES                           -->
+    <!-- ---------------------------------------------------- -->
+    <section class="card" id="sec-dicas">
+      <h2>7) Extensões sugeridas</h2>
+      <div class="body">
+        <ul>
+          <li>Sortear <strong>5 cartas</strong> (<code>count=5</code>) e exibir em grade.</li>
+          <li>Reaproveitar o <code>deck_id</code> para puxar novas cartas do mesmo baralho.</li>
+          <li>Detectar fim do baralho (<code>remaining === 0</code>) e reembaralhar com <code>/shuffle/</code>.</li>
+          <li>Tratar erros de CORS e rede com mensagens claras e estado de carregamento.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- Script real executável (separado do bloco demonstrativo) -->
+  <script>
+    // Este script é idêntico ao mostrado no bloco de código, mas aqui ele roda de fato na página.
+    const BASE_URL = "https://deckofcardsapi.com/api/deck";
+    const btn = document.getElementById("btn-sorteio");
+    const statusEl = document.getElementById("status");
+    const box = document.getElementById("resultado");
+    const img = document.getElementById("img-carta");
+    const title = document.getElementById("titulo-carta");
+    const meta = document.getElementById("meta-carta");
+
+    function setStatus(msg, ok = true){
+      statusEl.textContent = msg;
+      statusEl.style.color = ok ? "" : "#ff6a6a";
+    }
+
+    async function ensureOk(response){
+      if(!response.ok){
+        let extra = "";
+        try{ extra = await response.text(); }catch(e){}
+        throw new Error(`HTTP ${response.status} - ${response.statusText}${extra?": "+extra:""}`);
+      }
+      return response;
+    }
+
+    async function sortearCarta(){
+      try{
+        setStatus("Criando e embaralhando baralho...");
+        box.hidden = true;
+
+        const criarResp = await ensureOk(
+          await fetch(`${BASE_URL}/new/shuffle/?deck_count=1`)
+        );
+        const criarData = await criarResp.json();
+
+        setStatus("Sorteando 1 carta...");
+        const drawResp = await ensureOk(
+          await fetch(`${BASE_URL}/${criarData.deck_id}/draw/?count=1`)
+        );
+        const drawData = await drawResp.json();
+
+        const [carta] = drawData.cards;
+        img.src = carta.image;
+        img.alt = `Carta ${carta.value} de ${carta.suit}`;
+        title.textContent = `${carta.value} de ${carta.suit}`;
+        meta.textContent = `Código: ${carta.code} • Restantes no baralho: ${drawData.remaining}`;
+
+        box.hidden = false;
+        setStatus("Pronto! Carta sorteada com sucesso.");
+      }catch(err){
+        console.error(err);
+        setStatus(`Falha ao sortear carta: ${err.message}`, false);
+        box.hidden = true;
+      }
+    }
+
+    btn.addEventListener("click", sortearCarta);
+  </script>
+</body>
+</html>
