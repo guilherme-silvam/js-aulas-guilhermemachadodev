@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Aula: Promise.all(), Promise.allSettled() e LocalStorage</title>
+  <meta name="description" content="Exemplos práticos de Promise.all, Promise.allSettled e LocalStorage para iniciantes em JavaScript." />
+  <style>
+    /* Estilo mínimo para visualização limpa */
+    :root { --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e5e7eb; --accent:#22c55e; }
+    html,body { background: var(--bg); color: var(--text); margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial; }
+    header, main { max-width: 980px; margin: 0 auto; padding: 24px; }
+    header h1 { margin: 0 0 8px; font-size: 1.8rem; }
+    .grid { display: grid; gap: 16px; }
+    .two { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+    .card { background: var(--card); border: 1px solid #1f2937; border-radius: 12px; padding: 16px; }
+    .muted { color: var(--muted); font-size: 0.95rem; }
+    button { all: unset; background: #1f2937; padding: 10px 14px; border-radius: 10px; cursor: pointer; border: 1px solid #374151; }
+    button:hover { background: #111827; }
+    .btn-accent { background: #064e3b; border-color: #065f46; }
+    .btn-accent:hover { background: #065f46; }
+    code, pre { background: #0b1220; border: 1px solid #1f2937; padding: 6px 8px; border-radius: 8px; }
+    input[type="text"], input[type="email"] {
+      width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #374151; background: #0b1220; color: var(--text);
+    }
+    label { display: grid; gap: 6px; font-size: 0.95rem; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; }
+    .log { white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+    .ok { color: var(--accent); }
+    .err { color: #f87171; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Promises + LocalStorage — Exemplos práticos</h1>
+    <p class="muted">Demonstrações didáticas com <code>Promise.all()</code>, <code>Promise.allSettled()</code> e persistência de formulário via LocalStorage.</p>
+  </header>
+
+  <main class="grid">
+    <!-- ===================== BLOCO: PROMISES ===================== -->
+    <section id="bloco-promises" class="card">
+      <h2>1) Promises na prática</h2>
+      <p class="muted">Execute chamadas em paralelo e compare comportamentos de <code>Promise.all</code> vs <code>Promise.allSettled</code>.</p>
+
+      <div class="grid two">
+        <div>
+          <h3>Chamadas de API simultâneas</h3>
+          <p class="muted">Busca usuário + posts em paralelo (falha se qualquer uma falhar).</p>
+          <div class="row">
+            <button id="btn-api-all" class="btn-accent">Executar Promise.all (APIs)</button>
+            <button id="btn-api-falha">Simular falha (status inválido)</button>
+          </div>
+          <h4>Saída:</h4>
+          <div id="api-output" class="log"></div>
+        </div>
+
+        <div>
+          <h3>Simulações com setTimeout</h3>
+          <p class="muted">Três tarefas com tempos diferentes, uma falha. Compare <code>all</code> e <code>allSettled</code>.</p>
+          <div class="row">
+            <button id="btn-timeout-demo">Rodar simulação</button>
+          </div>
+          <h4>Saída (Promise.all):</h4>
+          <div id="timeout-all-output" class="log"></div>
+          <h4>Saída (Promise.allSettled):</h4>
+          <div id="timeout-settled-output" class="log"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== BLOCO: LOCALSTORAGE ===================== -->
+    <section id="bloco-localstorage" class="card">
+      <h2>2) LocalStorage: persistência de formulário</h2>
+      <p class="muted">Salva rascunho a cada digitação e restaura ao recarregar.</p>
+
+      <form id="newsletter" class="grid" style="max-width:520px">
+        <label>
+          Nome
+          <input id="nome" name="nome" type="text" placeholder="Seu nome" autocomplete="name" />
+        </label>
+        <label>
+          E-mail
+          <input id="email" name="email" type="email" placeholder="voce@exemplo.com" autocomplete="email" />
+        </label>
+        <label style="align-items:center; grid-template-columns: 1.2rem 1fr; gap:10px">
+          <input id="optin" name="optin" type="checkbox" />
+          Quero receber novidades
+        </label>
+
+        <div class="row">
+          <button type="submit" class="btn-accent">Enviar (simulado)</button>
+          <button type="button" id="limpar">Limpar rascunho</button>
+          <button type="button" id="exportar">Exportar rascunho (.json)</button>
+        </div>
+      </form>
+
+      <h4>Log do formulário:</h4>
+      <div id="form-log" class="log"></div>
+    </section>
+  </main>
+
+  <!-- Scripts separados por tema -->
+  <script type="module" src="./js/promises.js" defer></script>
+  <script type="module" src="./js/localstorage.js" defer></script>
+</body>
+</html>
