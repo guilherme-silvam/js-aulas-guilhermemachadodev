@@ -11,19 +11,6 @@ Neste espaço, você encontrará materiais organizados de forma clara e progress
 
 Os conteúdos estão organizados em pastas temáticas, representando diferentes níveis de conhecimento e tópicos específicos:
 
-### 1. **Iniciante**
-- [Aula 1](iniciante/introducao.md)
-  - Introdução JavaScript.
-  - Linha do tempo 
-- [Aula 2](iniciante/introducao.md)
-  - Primeiro codigo.
-  - Console.log e //comentarios em js.
-
-### 2. **Intermediário**
-
-
-### 3. **Avançado**
-
 
 ## 🛠️ Como Utilizar Este Repositório
 
